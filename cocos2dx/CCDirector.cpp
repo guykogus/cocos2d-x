@@ -705,7 +705,6 @@ void CCDirector::popScene(CCScene *trans) {
     else {
         m_bSendCleanupToScene = true;
         m_pNextScene = trans;
-        m_pobScenesStack->addObject(trans);
     }
 }
 
