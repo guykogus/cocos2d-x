@@ -222,7 +222,7 @@ void CCControlButton::setHighlighted(bool enabled)
     needsLayout();
     if( m_zoomOnTouchDown )
     {
-        float scaleValue = (isHighlighted() && isEnabled() && !isSelected()) ? 1.1f : 1.0f;
+        float scaleValue = (isHighlighted() && isEnabled() && !isSelected()) ? 0.9f : 1.0f;
         CCAction *zoomAction = CCScaleTo::create(0.05f, scaleValue);
         zoomAction->setTag(kZoomActionTag);
         runAction(zoomAction);
