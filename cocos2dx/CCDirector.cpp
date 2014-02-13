@@ -686,6 +686,29 @@ void CCDirector::popToSceneStackLevel(int level)
 	m_bSendCleanupToScene = false;
 }
 
+// http://www.cocos2d-x.org/forums/6/topics/14896
+
+CCScene *CCDirector::previousScene(void) {
+    unsigned int c = m_pobScenesStack->count();
+    if (c <= 1) return NULL;
+    return (CCScene*)m_pobScenesStack->objectAtIndex(c - 2);
+}
+
+void CCDirector::popScene(CCScene *trans) {
+    CCAssert(m_pRunningScene != NULL, "running scene should not null");
+    m_pobScenesStack->removeLastObject();
+    unsigned int c = m_pobScenesStack->count();
+    
+    if (c == 0) {
+        end();
+    }
+    else {
+        m_bSendCleanupToScene = true;
+        m_pNextScene = trans;
+        m_pobScenesStack->addObject(trans);
+    }
+}
+
 void CCDirector::end()
 {
     m_bPurgeDirecotorInNextLoop = true;

@@ -254,6 +254,16 @@ public:
      If level is <= than the current stack level, it won't do anything.
      */
  	void popToSceneStackLevel(int level);
+    
+    /**
+     Get the previous scene, if any.
+     */
+    CCScene *previousScene(void);
+    
+    /**
+     Pop to the previous scene with a transition.
+     */
+    void popScene(CCScene *trans);
 
     /** Replaces the running scene with a new one. The running scene is terminated.
      * ONLY call it if there is a running scene.
