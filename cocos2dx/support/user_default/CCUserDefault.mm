@@ -37,7 +37,7 @@
 // root name of xml
 #define USERDEFAULT_ROOT_NAME    "userDefaultRoot"
 
-#define KEEP_COMPATABILITY
+//#define KEEP_COMPATABILITY
 
 using namespace std;
 
