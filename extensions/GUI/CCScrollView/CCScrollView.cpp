@@ -29,7 +29,8 @@ NS_CC_EXT_BEGIN
 
 #define SCROLL_DEACCEL_RATE  0.95f
 #define SCROLL_DEACCEL_DIST  1.0f
-#define BOUNCE_DURATION      0.15f
+#define BOUNCE_DEACCEL_RATE  0.55f
+#define BOUNCE_DURATION      0.25f
 #define INSET_RATIO          0.2f
 #define MOVE_INCH            7.0f/160.0f
 
@@ -220,7 +221,7 @@ void CCScrollView::setContentOffsetInDuration(CCPoint offset, float dt)
 {
     CCFiniteTimeAction *scroll, *expire;
     
-    scroll = CCMoveTo::create(dt, offset);
+    scroll = CCEaseIn::create(CCMoveTo::create(dt, offset), 1.0f / (BOUNCE_DEACCEL_RATE * SCROLL_DEACCEL_RATE));
     expire = CCCallFuncN::create(this, callfuncN_selector(CCScrollView::stoppedAnimatedScroll));
     m_pContainer->runAction(CCSequence::create(scroll, expire, NULL));
     this->schedule(schedule_selector(CCScrollView::performedAnimatedScroll));
@@ -403,14 +404,17 @@ void CCScrollView::deaccelerateScrolling(float dt)
     this->setContentOffset(ccp(newX,newY));
     
     if ((fabsf(m_tScrollDistance.x) <= SCROLL_DEACCEL_DIST &&
-         fabsf(m_tScrollDistance.y) <= SCROLL_DEACCEL_DIST) ||
-        newY > maxInset.y || newY < minInset.y ||
-        newX > maxInset.x || newX < minInset.x ||
-        newX == maxInset.x || newX == minInset.x ||
-        newY == maxInset.y || newY == minInset.y)
+         fabsf(m_tScrollDistance.y) <= SCROLL_DEACCEL_DIST))
     {
         this->unschedule(schedule_selector(CCScrollView::deaccelerateScrolling));
         this->relocateContainer(true);
+    }
+    else if (newY > maxInset.y || newY < minInset.y ||
+             newX > maxInset.x || newX < minInset.x ||
+             newX == maxInset.x || newX == minInset.x ||
+             newY == maxInset.y || newY == minInset.y)
+    {
+        m_tScrollDistance = ccpMult(m_tScrollDistance, BOUNCE_DEACCEL_RATE);
     }
 }
 
