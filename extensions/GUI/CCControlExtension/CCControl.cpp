@@ -308,6 +308,7 @@ bool CCControl::isEnabled()
 void CCControl::setSelected(bool bSelected)
 {
     m_bSelected = bSelected;
+    m_eState = bSelected ? CCControlStateSelected : CCControlStateNormal;
     this->needsLayout();
 }
 
@@ -319,6 +320,7 @@ bool CCControl::isSelected()
 void CCControl::setHighlighted(bool bHighlighted)
 {
     m_bHighlighted = bHighlighted;
+    m_eState = bHighlighted ? CCControlStateHighlighted : CCControlStateNormal;
     this->needsLayout();
 }
 
