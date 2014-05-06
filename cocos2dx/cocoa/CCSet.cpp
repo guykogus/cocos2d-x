@@ -114,6 +114,7 @@ void CCSet::removeAllObjects()
 
         (*it)->release();
     }
+    m_pSet->clear();
 }
 
 bool CCSet::containsObject(CCObject *pObject)
