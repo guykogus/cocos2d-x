@@ -434,7 +434,8 @@ static BOOL configured = FALSE;
         
         //Add handler for bad al context messages, these are posted by the sound engine.
         [[NSNotificationCenter defaultCenter] addObserver:self    selector:@selector(badAlContextHandler) name:kCDN_BadAlContext object:nil];
-
+        
+        _queue = dispatch_queue_create("org.cocos2d-x.cocosdenshion.audio-manager", NULL);
     }    
     return self;        
 }    
@@ -446,6 +447,7 @@ static BOOL configured = FALSE;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self audioSessionSetActive:NO];
     [audioSourceChannels release];
+    dispatch_release(_queue);
     [super dealloc];
 }    
 
@@ -510,13 +512,15 @@ static BOOL configured = FALSE;
 }    
 
 -(void) setMute:(BOOL) muteValue {
-    if (muteValue != _mute) {
-        _mute = muteValue;
-        [soundEngine setMute:muteValue];
-        for( CDLongAudioSource *audioSource in audioSourceChannels) {
-            audioSource.mute = muteValue;
-        }    
-    }    
+    dispatch_async(_queue, ^{
+        if (muteValue != _mute) {
+            _mute = muteValue;
+            [soundEngine setMute:muteValue];
+            for( CDLongAudioSource *audioSource in audioSourceChannels) {
+                audioSource.mute = muteValue;
+            }
+        }
+    });
 }
 
 -(BOOL) enabled {
@@ -524,13 +528,15 @@ static BOOL configured = FALSE;
 }    
 
 -(void) setEnabled:(BOOL) enabledValue {
-    if (enabledValue != enabled_) {
-        enabled_ = enabledValue;
-        [soundEngine setEnabled:enabled_];
-        for( CDLongAudioSource *audioSource in audioSourceChannels) {
-            audioSource.enabled = enabled_;
-        }    
-    }    
+    dispatch_async(_queue, ^{
+        if (enabledValue != enabled_) {
+            enabled_ = enabledValue;
+            [soundEngine setEnabled:enabled_];
+            for( CDLongAudioSource *audioSource in audioSourceChannels) {
+                audioSource.enabled = enabled_;
+            }
+        }
+    });
 }
 
 -(CDLongAudioSource*) backgroundMusic
@@ -541,55 +547,67 @@ static BOOL configured = FALSE;
 //Load background music ready for playing
 -(void) preloadBackgroundMusic:(NSString*) filePath
 {
-    [self.backgroundMusic load:filePath];    
+    dispatch_async(_queue, ^{
+        [self.backgroundMusic load:filePath];
+    });
 }    
 
 -(void) playBackgroundMusic:(NSString*) filePath loop:(BOOL) loop
 {
-    [self.backgroundMusic load:filePath];
-
-	if (loop) {
-		[self.backgroundMusic setNumberOfLoops:-1];
-	} else {
-		[self.backgroundMusic setNumberOfLoops:0];
-	}
-
-	if (!willPlayBackgroundMusic || _mute) {
-		CDLOGINFO(@"Denshion::CDAudioManager - play bgm aborted because audio is not exclusive or sound is muted");
-		return;
-	}
-
-	[self.backgroundMusic play];
+    dispatch_async(_queue, ^{
+        [self.backgroundMusic load:filePath];
+        
+        if (loop) {
+            [self.backgroundMusic setNumberOfLoops:-1];
+        } else {
+            [self.backgroundMusic setNumberOfLoops:0];
+        }
+        
+        if (!willPlayBackgroundMusic || _mute) {
+            CDLOGINFO(@"Denshion::CDAudioManager - play bgm aborted because audio is not exclusive or sound is muted");
+            return;
+        }
+        
+        [self.backgroundMusic play];
+    });
 }
 
 -(void) stopBackgroundMusic
 {
-    [self.backgroundMusic stop];
+    dispatch_async(_queue, ^{
+        [self.backgroundMusic stop];
+    });
 }
 
 -(void) pauseBackgroundMusic
 {
-    [self.backgroundMusic pause];
-}    
+    dispatch_async(_queue, ^{
+        [self.backgroundMusic pause];
+    });
+}
 
 -(void) resumeBackgroundMusic
 {
-    if (!willPlayBackgroundMusic || _mute) {
-        CDLOGINFO(@"Denshion::CDAudioManager - resume bgm aborted because audio is not exclusive or sound is muted");
-        return;
-    }
-    
-    if (![self.backgroundMusic paused]) {
-        return;
-    }
-    
-    [self.backgroundMusic resume];
-}    
+    dispatch_async(_queue, ^{
+        if (!willPlayBackgroundMusic || _mute) {
+            CDLOGINFO(@"Denshion::CDAudioManager - resume bgm aborted because audio is not exclusive or sound is muted");
+            return;
+        }
+        
+        if (![self.backgroundMusic paused]) {
+            return;
+        }
+        
+        [self.backgroundMusic resume];
+    });
+}
 
 -(void) rewindBackgroundMusic
 {
-    [self.backgroundMusic rewind];
-}    
+    dispatch_async(_queue, ^{
+        [self.backgroundMusic rewind];
+    });
+}
 
 -(void) setBackgroundMusicCompletionListener:(id) listener selector:(SEL) selector {
     backgroundMusicCompletionListener = listener;

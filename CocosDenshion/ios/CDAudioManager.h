@@ -164,6 +164,8 @@ typedef enum {
     //For handling resign/become active
     BOOL _isObservingAppEvents;
     tAudioManagerResignBehavior _resignBehavior;
+    
+    dispatch_queue_t _queue;
 }
 
 @property (readonly) CDSoundEngine *soundEngine;
