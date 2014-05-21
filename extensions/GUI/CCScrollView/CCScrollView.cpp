@@ -27,10 +27,11 @@
 
 NS_CC_EXT_BEGIN
 
-#define SCROLL_DEACCEL_RATE  0.95f
-#define SCROLL_DEACCEL_DIST  1.0f
+#define SCROLL_DEACCEL_RATE  0.9f
+#define SCROLL_DEACCEL_DIST  2.5f
 #define BOUNCE_DEACCEL_RATE  0.55f
 #define BOUNCE_DURATION      0.25f
+#define DRAG_RESISTANCE      0.3f
 #define INSET_RATIO          0.2f
 #define MOVE_INCH            7.0f/160.0f
 
@@ -661,6 +662,39 @@ void CCScrollView::ccTouchMoved(CCTouch* touch, CCEvent* event)
             frame = getViewRect();
 
             newPoint     = this->convertTouchToNodeSpace((CCTouch*)m_pTouches->objectAtIndex(0));
+            moveDistance = ccpSub(newPoint, m_tTouchPoint);
+            
+            // Calculate drag resistance
+            CCPoint offset(m_pContainer->getPosition().x + moveDistance.x,
+                           m_pContainer->getPosition().y + moveDistance.y);
+            CCPoint original(offset);
+            const CCPoint minOffset(minContainerOffset());
+            const CCPoint maxOffset(maxContainerOffset());
+            // Horizontal resistance
+            if (offset.x < minOffset.x)
+            {
+                float deltaX = minOffset.x - offset.x;
+                offset.x = minOffset.x - (deltaX * DRAG_RESISTANCE);
+            }
+            else if (offset.x > maxOffset.x)
+            {
+                float deltaX = maxOffset.x - offset.x;
+                offset.x = maxOffset.x - (deltaX * DRAG_RESISTANCE);
+            }
+            // Vertical resistance
+            if (offset.y < minOffset.y)
+            {
+                float deltaY = minOffset.y - offset.y;
+                offset.y = minOffset.y - (deltaY * DRAG_RESISTANCE);
+            }
+            else if (offset.y > maxOffset.y)
+            {
+                float deltaY = maxOffset.y - offset.y;
+                offset.y = maxOffset.y - (deltaY * DRAG_RESISTANCE);
+            }
+            CCPoint delta(ccpSub(original, offset));
+            
+            newPoint = ccpSub(newPoint, delta);
             moveDistance = ccpSub(newPoint, m_tTouchPoint);
             
             float dis = 0.0f;
