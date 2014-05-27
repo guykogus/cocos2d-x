@@ -626,7 +626,7 @@ void CCTableView::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
     CCScrollView::ccTouchMoved(pTouch, pEvent);
 
-    if (m_pTouchedCell && isTouchMoved()) {
+    if (m_pTouchedCell && isTouchMoved() && fabsf(m_tScrollDistance.y) > 0.5f) {
         if(m_pTableViewDelegate != NULL) {
             m_pTableViewDelegate->tableCellUnhighlight(this, m_pTouchedCell);
         }
