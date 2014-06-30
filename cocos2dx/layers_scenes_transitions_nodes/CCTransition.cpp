@@ -1299,7 +1299,10 @@ void CCTransitionCrossFade::onEnter()
 
     // render outScene to its texturebuffer
     outTexture->begin();
+    bool visible = m_pOutScene->isVisible();
+    m_pOutScene->setVisible(true);
     m_pOutScene->visit();
+    m_pOutScene->setVisible(visible);
     outTexture->end();
 
     // create blend functions
