@@ -63,6 +63,7 @@ CCArmatureAnimation::CCArmatureAnimation()
     , m_sFrameEventCallFunc(NULL)
     , m_sMovementEventTarget(NULL)
     , m_sFrameEventTarget(NULL)
+    , m_pScriptObjectDict(NULL)
 {
 
 }
@@ -73,6 +74,8 @@ CCArmatureAnimation::~CCArmatureAnimation(void)
     CC_SAFE_RELEASE_NULL(m_pAnimationData);
 
     CC_SAFE_RELEASE_NULL(m_pUserObject);
+    CC_SAFE_RELEASE_NULL(m_pScriptObjectDict);
+
 }
 
 bool CCArmatureAnimation::init(CCArmature *armature)
@@ -253,7 +256,7 @@ void CCArmatureAnimation::play(const char *animationName, int durationTo, int du
 
 void CCArmatureAnimation::playByIndex(int animationIndex, int durationTo, int durationTween,  int loop, int tweenEasing)
 {
-    playWithIndex(animationIndex, durationTo, durationTween, tweenEasing);
+    playWithIndex(animationIndex, durationTo, durationTween, loop, tweenEasing);
 }
 
 void CCArmatureAnimation::playWithIndex(int animationIndex, int durationTo, int durationTween,  int loop, int tweenEasing)
@@ -554,6 +557,17 @@ void CCArmatureAnimation::updateMovementList()
 
         m_bOnMovementList = true;
     }
+}
+
+cocos2d::CCDictionary * CCArmatureAnimation::getScriptObjectDict()
+{
+    return m_pScriptObjectDict;
+}
+void CCArmatureAnimation::setScriptObjectDict(cocos2d::CCDictionary* pScriptObjectDict)
+{
+    CC_SAFE_RETAIN(pScriptObjectDict);
+    CC_SAFE_RELEASE(m_pScriptObjectDict);
+    m_pScriptObjectDict = pScriptObjectDict;
 }
 
 NS_CC_EXT_END

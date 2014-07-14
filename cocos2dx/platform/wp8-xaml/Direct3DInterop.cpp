@@ -24,6 +24,7 @@ THE SOFTWARE.
 ****************************************************************************/
 #include "Direct3DInterop.h"
 #include "Direct3DContentProvider.h"
+#include "proj.wp8/EditBoxEvent.h"
 
 using namespace Windows::Foundation;
 using namespace Windows::UI::Core;
@@ -33,6 +34,7 @@ using namespace Windows::Phone::Graphics::Interop;
 using namespace Windows::Phone::Input::Interop;
 using namespace Windows::Graphics::Display;
 using namespace DirectX;
+using namespace PhoneDirect3DXamlAppComponent;
 
 namespace PhoneDirect3DXamlAppComponent
 {
@@ -43,13 +45,23 @@ Direct3DInterop::Direct3DInterop()
     m_renderer = ref new Cocos2dRenderer();
 }
 
-
-IDrawingSurfaceContentProvider^ Direct3DInterop::CreateContentProvider()
+IDrawingSurfaceBackgroundContentProvider^ Direct3DInterop::CreateContentProvider()
 {
-    ComPtr<Direct3DContentProvider> provider = Make<Direct3DContentProvider>(this);
-    return reinterpret_cast<IDrawingSurfaceContentProvider^>(provider.Get());
+	ComPtr<Direct3DContentProvider> provider = Make<Direct3DContentProvider>(this);
+	return reinterpret_cast<IDrawingSurfaceBackgroundContentProvider^>(provider.Get());
 }
 
+
+// Interface With Direct3DContentProvider
+HRESULT Direct3DInterop::Connect(_In_ IDrawingSurfaceRuntimeHostNative* host, _In_ ID3D11Device1* device)
+{
+    return S_OK;
+}
+
+void Direct3DInterop::Disconnect()
+{
+    m_renderer->Disconnect();  
+}
 
 // IDrawingSurfaceManipulationHandler
 void Direct3DInterop::SetManipulationHost(DrawingSurfaceManipulationHost^ manipulationHost)
@@ -75,9 +87,11 @@ IAsyncAction^ Direct3DInterop::OnSuspending()
     return m_renderer->OnSuspending();
 }
 
-bool Direct3DInterop::OnBackKeyPress()
+void Direct3DInterop::OnBackKeyPress()
 {
-    return m_renderer->OnBackKeyPress();
+    std::lock_guard<std::mutex> guard(mMutex);
+    std::shared_ptr<BackButtonEvent> e(new BackButtonEvent());
+    mInputEvents.push(e);
 }
 
 // Pointer Event Handlers. We need to queue up pointer events to pass them to the drawing thread
@@ -120,6 +134,13 @@ void Direct3DInterop::AddPointerEvent(PointerEventType type, PointerEventArgs^ a
     mInputEvents.push(e);
 }
 
+void Direct3DInterop::OnCocos2dEditboxEvent(Object^ sender, Platform::String^ args, Windows::Foundation::EventHandler<Platform::String^>^ handler)
+{
+	std::lock_guard<std::mutex> guard(mMutex);
+	std::shared_ptr<EditBoxEvent> e(new EditBoxEvent(sender, args, handler));
+	mInputEvents.push(e);
+}
+
 void Direct3DInterop::ProcessEvents()
 {
     std::lock_guard<std::mutex> guard(mMutex);
@@ -133,41 +154,48 @@ void Direct3DInterop::ProcessEvents()
 }
 
 
-// Interface With Direct3DContentProvider
-void Direct3DInterop::Connect()
+HRESULT Direct3DInterop::PrepareResources(_In_ const LARGE_INTEGER* presentTargetTime, _Inout_ DrawingSurfaceSizeF* desiredRenderTargetSize)
 {
-
-    m_renderer->Connect();
+	desiredRenderTargetSize->width = WindowBounds.Width;
+	desiredRenderTargetSize->height = WindowBounds.Height;
+	return S_OK;
 }
 
-void Direct3DInterop::Disconnect()
+HRESULT Direct3DInterop::Draw(_In_ ID3D11Device1* device, _In_ ID3D11DeviceContext1* context, _In_ ID3D11RenderTargetView* renderTargetView)
 {
-    m_renderer->Disconnect();
-}
-
-void Direct3DInterop::PrepareResources(LARGE_INTEGER presentTargetTime)
-{
-}
-
-void Direct3DInterop::Draw(_In_ ID3D11Device1* device, _In_ ID3D11DeviceContext1* context, _In_ ID3D11RenderTargetView* renderTargetView)
-{
- 
-
     m_renderer->UpdateDevice(device, context, renderTargetView);
+#if 0
     if(mCurrentOrientation != WindowOrientation)
     {
         mCurrentOrientation = WindowOrientation;
         m_renderer->OnOrientationChanged(mCurrentOrientation);
-    }
+    }  
+#endif // 0
+
     ProcessEvents();
     m_renderer->Render();
+	RequestAdditionalFrame();
+	return S_OK;
 }
 
 void Direct3DInterop::SetCocos2dEventDelegate(Cocos2dEventDelegate^ delegate) 
 { 
     m_delegate = delegate; 
     m_renderer->SetXamlEventDelegate(delegate);
-};
+}
+
+void Direct3DInterop::SetCocos2dMessageBoxDelegate(Cocos2dMessageBoxDelegate ^ delegate)
+{
+    m_messageBoxDelegate = delegate;
+    m_renderer->SetXamlMessageBoxDelegate(delegate);
+}
+
+void Direct3DInterop::SetCocos2dEditBoxDelegate(Cocos2dEditBoxDelegate ^ delegate)
+{
+    m_editBoxDelegate = delegate;
+    m_renderer->SetXamlEditBoxDelegate(delegate);
+}
+
 
 bool Direct3DInterop::SendCocos2dEvent(Cocos2dEvent event)
 {
@@ -178,6 +206,5 @@ bool Direct3DInterop::SendCocos2dEvent(Cocos2dEvent event)
     }
     return false;
 }
-
 
 }

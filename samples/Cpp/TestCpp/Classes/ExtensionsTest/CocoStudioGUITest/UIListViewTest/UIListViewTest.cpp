@@ -57,7 +57,7 @@ bool UIListViewExTest_Vertical::init()
         listView->setDirection(SCROLLVIEW_DIR_VERTICAL);
         listView->setTouchEnabled(true);
         listView->setBounceEnabled(true);
-        listView->setBackGroundImage("cocosgui/green_edit.png");
+        listView->setBackGroundImage("cocosui/green_edit.png");
         listView->setBackGroundImageScale9Enabled(true);
         listView->setSize(CCSizeMake(240, 130));
         listView->setPosition(ccp((widgetSize.width - backgroundSize.width) / 2 +
@@ -72,7 +72,7 @@ bool UIListViewExTest_Vertical::init()
         UIButton* default_button = UIButton::create();
         default_button->setName("TextButton");
         default_button->setTouchEnabled(true);
-        default_button->loadTextures("cocosgui/backtotoppressed.png", "cocosgui/backtotopnormal.png", "");
+        default_button->loadTextures("cocosui/backtotoppressed.png", "cocosui/backtotopnormal.png", "");
         
         Layout* default_item = Layout::create();
         default_item->setTouchEnabled(true);
@@ -101,7 +101,7 @@ bool UIListViewExTest_Vertical::init()
             UIButton* custom_button = UIButton::create();
             custom_button->setName("TextButton");
             custom_button->setTouchEnabled(true);
-            custom_button->loadTextures("cocosgui/button.png", "cocosgui/buttonHighlighted.png", "");
+            custom_button->loadTextures("cocosui/button.png", "cocosui/buttonHighlighted.png", "");
             custom_button->setScale9Enabled(true);
             custom_button->setSize(default_button->getSize());
             
@@ -120,7 +120,7 @@ bool UIListViewExTest_Vertical::init()
             UIButton* custom_button = UIButton::create();
             custom_button->setName("TextButton");
             custom_button->setTouchEnabled(true);
-            custom_button->loadTextures("cocosgui/button.png", "cocosgui/buttonHighlighted.png", "");
+            custom_button->loadTextures("cocosui/button.png", "cocosui/buttonHighlighted.png", "");
             custom_button->setScale9Enabled(true);
             custom_button->setSize(default_button->getSize());
             
@@ -152,9 +152,6 @@ bool UIListViewExTest_Vertical::init()
         // set all items layout gravity
         listView->setGravity(LISTVIEW_GRAVITY_CENTER_VERTICAL);
         
-        // set items margin
-//        listViewEx->setItemsMargin(2);
-        
         return true;
     }
     
@@ -165,13 +162,20 @@ void UIListViewExTest_Vertical::selectedItemEvent(CCObject *pSender, ListViewEve
 {
     switch (type)
     {
-        case cocos2d::gui::LISTVIEW_ONSELECTEDITEM:
+        case LISTVIEW_ONSELECTEDITEM_START:
         {
             UIListView* listViewEx = static_cast<UIListView*>(pSender);
-            CCLOG("select child index = %d", listViewEx->getCurSelectedIndex());
-        }
+            if (listViewEx)
+                CCLOG("select child start index = %d", listViewEx->getCurSelectedIndex());
             break;
-            
+        }
+        case LISTVIEW_ONSELECTEDITEM_END:
+        {
+            UIListView* listViewEx = static_cast<UIListView*>(pSender);
+            if (listViewEx)
+                CCLOG("select child end index = %d", listViewEx->getCurSelectedIndex());
+            break;
+        }
         default:
             break;
     }
@@ -233,7 +237,7 @@ bool UIListViewExTest_Horizontal::init()
         listView->setDirection(SCROLLVIEW_DIR_HORIZONTAL);
         listView->setTouchEnabled(true);
         listView->setBounceEnabled(true);
-        listView->setBackGroundImage("cocosgui/green_edit.png");
+        listView->setBackGroundImage("cocosui/green_edit.png");
         listView->setBackGroundImageScale9Enabled(true);
         listView->setSize(CCSizeMake(240, 130));
         listView->setPosition(ccp((widgetSize.width - backgroundSize.width) / 2 +
@@ -248,7 +252,7 @@ bool UIListViewExTest_Horizontal::init()
         UIButton* default_button = UIButton::create();
         default_button->setName("TextButton");
         default_button->setTouchEnabled(true);
-        default_button->loadTextures("cocosgui/backtotoppressed.png", "cocosgui/backtotopnormal.png", "");
+        default_button->loadTextures("cocosui/backtotoppressed.png", "cocosui/backtotopnormal.png", "");
         
         Layout* default_item = Layout::create();
         default_item->setTouchEnabled(true);
@@ -277,7 +281,7 @@ bool UIListViewExTest_Horizontal::init()
             UIButton* custom_button = UIButton::create();
             custom_button->setName("TextButton");
             custom_button->setTouchEnabled(true);
-            custom_button->loadTextures("cocosgui/button.png", "cocosgui/buttonHighlighted.png", "");
+            custom_button->loadTextures("cocosui/button.png", "cocosui/buttonHighlighted.png", "");
             custom_button->setScale9Enabled(true);
             custom_button->setSize(default_button->getSize());
             
@@ -296,7 +300,7 @@ bool UIListViewExTest_Horizontal::init()
             UIButton* custom_button = UIButton::create();
             custom_button->setName("TextButton");
             custom_button->setTouchEnabled(true);
-            custom_button->loadTextures("cocosgui/button.png", "cocosgui/buttonHighlighted.png", "");
+            custom_button->loadTextures("cocosui/button.png", "cocosui/buttonHighlighted.png", "");
             custom_button->setScale9Enabled(true);
             custom_button->setSize(default_button->getSize());
             
@@ -341,13 +345,20 @@ void UIListViewExTest_Horizontal::selectedItemEvent(CCObject *pSender, ListViewE
 {
     switch (type)
     {
-        case cocos2d::gui::LISTVIEW_ONSELECTEDITEM:
-            {
-                UIListView* listViewEx = static_cast<UIListView*>(pSender);
-                CCLOG("select child index = %d", listViewEx->getCurSelectedIndex());
-            }
+        case cocos2d::ui::LISTVIEW_ONSELECTEDITEM_START:
+        {
+            UIListView* listViewEx = static_cast<UIListView*>(pSender);
+            if (listViewEx)
+                CCLOG("select child start index = %d", listViewEx->getCurSelectedIndex());
             break;
-            
+        }
+        case cocos2d::ui::LISTVIEW_ONSELECTEDITEM_END:
+        {
+            UIListView* listViewEx = static_cast<UIListView*>(pSender);
+            if (listViewEx)
+                CCLOG("select child end index = %d", listViewEx->getCurSelectedIndex());
+            break;
+        }
         default:
             break;
     }

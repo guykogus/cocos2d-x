@@ -30,7 +30,7 @@
 
 NS_CC_BEGIN
 
-namespace gui {
+namespace ui {
 
 typedef enum
 {
@@ -45,8 +45,10 @@ typedef enum {
     PAGEVIEW_TOUCHRIGHT
 }PVTouchDir;
 
-class PageView : public Layout , public UIScrollInterface
+class CC_EX_DLL PageView : public Layout , public UIScrollInterface
 {
+    
+    DECLARE_CLASS_GUI_INFO
     
 public:
     /**
@@ -159,11 +161,13 @@ public:
      */
     virtual std::string getDescription() const;
 
+    virtual void onEnter();
 protected:
     virtual void addChild(CCNode * child);
     virtual void addChild(CCNode * child, int zOrder);
     virtual void addChild(CCNode* child, int zOrder, int tag);
-    virtual void removeChild(CCNode* widget, bool cleanup = true);
+    virtual void removeChild(CCNode* widget);
+    virtual void removeChild(CCNode* widget, bool cleanup);
     virtual void removeAllChildren();
     virtual void removeAllChildrenWithCleanup(bool cleanup);
     virtual CCArray* getChildren(){return Widget::getChildren();};

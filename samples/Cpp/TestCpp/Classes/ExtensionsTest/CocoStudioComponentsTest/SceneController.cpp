@@ -38,12 +38,12 @@ bool SceneController::init()
 
 void SceneController::onEnter()
 {
+    CCComController::onEnter();
     _fAddTargetTime = 1.0f;
     
     _targets = new CCArray;
     _projectiles = new CCArray;
    
-    ((CCComAudio*)(m_pOwner->getComponent("Audio")))->playBackgroundMusic("background-music-aac.wav", true);
     ((CCComAttribute*)(m_pOwner->getComponent("CCComAttribute")))->setInt("KillCount", 0);
 }
 
