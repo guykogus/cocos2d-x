@@ -2,6 +2,7 @@
 
 #include "LabelReader.h"
 #include "../../../GUI/UIWidgets/UILabel.h"
+#include <algorithm>
 
 NS_CC_EXT_BEGIN
 
