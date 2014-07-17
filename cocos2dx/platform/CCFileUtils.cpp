@@ -712,7 +712,7 @@ void CCFileUtils::setSearchPaths(const std::vector<std::string>& searchPaths)
         {
             path += "/";
         }
-        if (!bExistDefaultRootPath && path == m_strDefaultResRootPath)
+        if (!bExistDefaultRootPath && path == (m_strDefaultResRootPath + '/'))
         {
             bExistDefaultRootPath = true;
         }
