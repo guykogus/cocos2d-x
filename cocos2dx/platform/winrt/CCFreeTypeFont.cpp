@@ -40,6 +40,7 @@ using namespace std;
 NS_CC_BEGIN
 
 static map<std::string, FontBufferInfo> s_fontsNames;
+static vector<FT_Face> s_faces;
 static FT_Library s_FreeTypeLibrary = nullptr;
 
 CCFreeTypeFont::CCFreeTypeFont() 
@@ -82,7 +83,6 @@ bool CCFreeTypeFont::initWithString(
 	FT_Error error = 0;
 	unsigned long size = 0;
     unsigned char* pBuffer = nullptr;
-    unsigned char* data = nullptr;
 
     CCSize winSize = CCDirector::sharedDirector()->getWinSizeInPixels();
     m_windowWidth = (int)winSize.width;
@@ -90,16 +90,13 @@ bool CCFreeTypeFont::initWithString(
     m_inWidth = inWidth;
     m_inHeight = inHeight;
 
-#if 0
     // check the cache for the font file buffer
     auto ittFontNames = s_fontsNames.find(pFontName);
     if(ittFontNames != s_fontsNames.end()) 
     {
-        pBuffer = ittFontNames->second.pBuffer;
+        pBuffer =ittFontNames->second.pBuffer;
         size = ittFontNames->second.size;
-    }  
-#endif // 0
-
+    }
     
 	if(!pBuffer)
     {
@@ -124,13 +121,11 @@ bool CCFreeTypeFont::initWithString(
         if(!pBuffer) // font not found!
             return false;
 
-#if 0
         // cache the font file buffer
         FontBufferInfo info;
         info.pBuffer = pBuffer;
         info.size = size;
         s_fontsNames[pFontName]=info;
-#endif // 0
     }
 
     m_fontName = pFontName;
@@ -139,6 +134,38 @@ bool CCFreeTypeFont::initWithString(
 	if(!s_FreeTypeLibrary)
 	{
 		error = FT_Init_FreeType(&s_FreeTypeLibrary);
+
+        // Load up extra fonts
+        static const size_t kFilesCount = 4;
+        const char* fontFiles[kFilesCount] = {
+            "MSNeoGothic",  // Korean
+            "DengXian",     // Chinese (Simplified)
+            "MSMhei",       // Chinese (Traditional)
+            "YuGothic"      // Japanese
+        };
+        s_faces.reserve(kFilesCount);
+        
+        for (size_t i = 0; i < kFilesCount && !error; ++i)
+        {
+            FT_Face face;
+            unsigned long fontSize = 0;
+            unsigned char* fontData = loadSystemFont(fontFiles[i], &fontSize);
+            error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
+            if (!error)
+                error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+            else
+                CCLOG("Failed to load face %s", fontFiles[i]);
+
+            if (!error)
+                error = FT_Set_Char_Size(face, nSize << 6, nSize << 6, 72, 72);
+            else
+                CCLOG("Failed to select unicode charmap for %s", fontFiles[i]);
+
+            if (!error)
+                s_faces.push_back(face);
+            else
+                CCLOG("Failed to set char size for %s", fontFiles[i]);
+        }
 	}
 
 	if(!error && !m_face)
@@ -151,15 +178,11 @@ bool CCFreeTypeFont::initWithString(
         error = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE);
     }
 
-
     if(!error)
 	    error = FT_Set_Char_Size(m_face,nSize<<6,nSize<<6,72,72);
 
     if(!error)
 	    error = initGlyphs(pText);
-	
-    delete [] pBuffer;
-
 
 	return error == 0;
 }
@@ -378,6 +401,7 @@ FT_Error CCFreeTypeFont::initGlyphs(const char* text)
 
     m_textWidth = 0;
     m_textHeight = 0;
+
     // the height of a line of text based on the max height of a glyph in the font size
     m_lineHeight = ((m_face->size->metrics.ascender) >> 6) - ((m_face->size->metrics.descender) >> 6);
 
@@ -442,7 +466,6 @@ void CCFreeTypeFont::initWords(const char* text)
 
 FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::string& text, FT_Vector& pen) 
 {
-	FT_GlyphSlot	slot = m_face->glyph; 
 	FT_UInt			glyph_index;
 	FT_UInt			previous = 0;
 	FT_Error		error = 0;
@@ -464,7 +487,6 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 
     glyphs.clear();
 	glyphs.resize(num_chars);
-	FT_Bool useKerning = FT_HAS_KERNING(m_face);
 
 	for (int n = 0; n < num_chars; n++)
 	{
@@ -472,12 +494,19 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 
 		/* convert character code to glyph index */
         FT_ULong c = pwszBuffer[n];
-		glyph_index = FT_Get_Char_Index(m_face, c);
+        FT_Face face = m_face;
+        glyph_index = FT_Get_Char_Index(face, c);
+        // If the glyph isn't found, search the other faces
+        for (auto i = s_faces.begin(); (glyph_index == 0) && (i != s_faces.end()); ++i)
+        {
+            face = *i;
+            glyph_index = FT_Get_Char_Index(face, c);
+        }
 
- 		if (useKerning && previous && glyph_index)
+        if (FT_HAS_KERNING(face) && previous && glyph_index)
 		{
 			FT_Vector  delta;
-			FT_Get_Kerning(m_face, previous, glyph_index,
+            FT_Get_Kerning(face, previous, glyph_index,
 							FT_KERNING_DEFAULT, &delta);
 			pen.x += delta.x >> 6;
 		}
@@ -487,20 +516,26 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 		glyph->index = glyph_index;
 
 		/* load glyph image into the slot without rendering */
-		error = FT_Load_Glyph(m_face, glyph_index, FT_LOAD_DEFAULT);
+        error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
 		if (error)
 			continue;  /* ignore errors, jump to next glyph */
 
 		/* extract glyph image and store it in our table */
-		error = FT_Get_Glyph(m_face->glyph, &glyph->image);
+        error = FT_Get_Glyph(face->glyph, &glyph->image);
 		if (error)
 			continue;  /* ignore errors, jump to next glyph */
 
 		 /* translate the glyph image now */
-		FT_Glyph_Transform(glyph->image, 0, &glyph->pos);
+        float height = sqrtf((float)(m_face->height) / (float)(face->height));
+        FT_Matrix matrix;
+        matrix.xx = 0x10000L * height;
+        matrix.xy = 0.0;
+        matrix.yx = 0.0;
+        matrix.yy = 0x10000L * height;
+		FT_Glyph_Transform(glyph->image, &matrix, &glyph->pos);
 
 		/* increment pen position */
-		pen.x += slot->advance.x >> 6;
+		pen.x += (FT_Pos)(face->glyph->advance.x * height) >> 6;
 
 		/* record current glyph index */
 		previous = glyph_index;
@@ -590,8 +625,13 @@ unsigned char* CCFreeTypeFont::loadFont(const char *pFontName, unsigned long *si
 
 unsigned char* CCFreeTypeFont::loadSystemFont(const char *pFontName, unsigned long *size) 
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-	return nullptr;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+    //Froxul: Add the ability to use system fonts on WP8 and WinRT
+    //http://www.cocos2d-x.org/forums/6/topics/37224
+    std::string fontName(pFontName);
+    if (fontName.find(".ttf") == std::string::npos) fontName += ".ttf";
+    std::string fontPath = "C:\\Windows\\Fonts\\" + fontName;
+    return CCFileUtils::sharedFileUtils()->getFileData(fontPath.c_str(), "rb", size);
 #else
     std::string aName(pFontName);
     unsigned char* pBuffer = nullptr;
