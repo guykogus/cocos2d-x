@@ -315,7 +315,7 @@ void TriggerMng::buildJson(rapidjson::Document &document, cocos2d::extension::Co
 	int extent = 0;
 	int border = 0;
 	std::string key;
-	const char *str = NULL;
+//	const char *str = NULL;
 	stExpCocoNode *pTriggersArray = pCocoNode[13].GetChildArray(pCocoLoader);
 
 	document.SetArray();
@@ -331,7 +331,7 @@ void TriggerMng::buildJson(rapidjson::Document &document, cocos2d::extension::Co
 		{
 			std::string key = pTriggerArray[i].GetName(pCocoLoader);
 			const char *str = pTriggerArray[i].GetValue(pCocoLoader);
-			rapidjson::Type type = pTriggerArray[i].GetType(pCocoLoader);
+//			rapidjson::Type type = pTriggerArray[i].GetType(pCocoLoader);
 
 			if (key.compare("actions") == 0)
 			{
