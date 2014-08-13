@@ -97,12 +97,10 @@ IAsyncAction^ Cocos2dRenderer::OnSuspending()
 // user pressed the Back Key on the phone
 void Cocos2dRenderer::OnBackKeyPress()
 {
-    // handle the backkey in your app here.
-    // call Cocos2dEvent::TerminateApp if it is time to exit your app.
-    // ie. the user is on your first page and wishes to exit your app.
-    // uncomment next line and comment TerminateApp to respond with keyBackClicked() in layers, remember to add init layer use setKeypadEnabled(true)
-    // CCDirector::sharedDirector()->getKeypadDispatcher()->dispatchKeypadMSG( ccKeypadMSGType::kTypeBackClicked );
-    m_delegate->Invoke(Cocos2dEvent::TerminateApp);
+    if (mApp->shouldQuitOnKeyBack())
+        m_delegate->Invoke(Cocos2dEvent::TerminateApp);
+    else
+        CCDirector::sharedDirector()->getKeypadDispatcher()->dispatchKeypadMSG(ccKeypadMSGType::kTypeBackClicked);
 }
 
 void Cocos2dRenderer::OnUpdateDevice()

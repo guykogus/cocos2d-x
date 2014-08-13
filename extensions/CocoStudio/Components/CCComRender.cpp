@@ -225,7 +225,7 @@ bool CCComRender::serialize(void* r)
                             for (int i = 0; i < count; ++i)
                             {
                                 std::string key = tpChildArray[i].GetName(&tCocoLoader);
-                                const char *str = tpChildArray[i].GetValue(&tCocoLoader);
+//                                const char *str = tpChildArray[i].GetValue(&tCocoLoader);
                                 if (key.compare("armature_data") == 0)
                                 {
                                     int length = tpChildArray[i].GetChildNum();

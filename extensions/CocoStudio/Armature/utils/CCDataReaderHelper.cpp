@@ -2018,7 +2018,7 @@ CCDisplayData* CCDataReaderHelper::decodeBoneDisplay(CocoLoader *pCocoLoader, st
 	std::string key = child->GetName(pCocoLoader);
 	str = child->GetValue(pCocoLoader);
 	CCDisplayData *displayData = NULL;
-	DisplayType displayType = CS_DISPLAY_SPRITE;
+//	DisplayType displayType = CS_DISPLAY_SPRITE;
 
 	if (key.compare(A_DISPLAY_TYPE) == 0)
 	{
@@ -2537,7 +2537,7 @@ CCContourData* CCDataReaderHelper::decodeContour(CocoLoader *pCocoLoader, stExpC
 			stExpCocoNode *pVerTexPointArray = verTexPointArray[i].GetChildArray(pCocoLoader);
 			for (int i = count - 1; i >= 0; --i)
 			{
-				int num = pVerTexPointArray[i].GetChildNum();
+//				int num = pVerTexPointArray[i].GetChildNum();
 				stExpCocoNode *pVerTexPoint = pVerTexPointArray[i].GetChildArray(pCocoLoader);
 				CCContourVertex2 *vertex = new CCContourVertex2(0, 0);
 				vertex->x = atof(pVerTexPoint[0].GetValue(pCocoLoader));
