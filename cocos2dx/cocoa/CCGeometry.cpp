@@ -271,4 +271,58 @@ bool CCRect::intersectsRect(const CCRect& rect) const
              rect.getMaxY() <      getMinY());
 }
 
+CCRect CCRect::intersection(const CCRect& rect) const
+{
+    CCRect intersection;
+    if (intersectsRect(rect))
+    {
+        if (rect.getMinX() <= getMinX())
+        {
+            intersection.origin.x = getMinX();
+            
+            // rect is wider than this
+            if (rect.getMaxX() >= getMaxX())
+                intersection.size.width = size.width;
+            // The right part of rect is contained
+            else
+                intersection.size.width = rect.getMaxX() - getMinX();
+        }
+        else
+        {
+            intersection.origin.x = rect.getMinX();
+            
+            // The left part of rect is contained
+            if (rect.getMaxX() >= getMaxX())
+                intersection.size.width = getMaxX() - rect.getMinX();
+            // rect is horizontally contained
+            else
+                intersection.size.width = rect.size.width;
+        }
+        
+        if (rect.getMinY() <= getMinY())
+        {
+            intersection.origin.y = getMinY();
+            
+            // rect is taller than this
+            if (rect.getMaxY() >= getMaxY())
+                intersection.size.height = size.height;
+            // The top part of rect is contained
+            else
+                intersection.size.height = rect.getMaxY() - getMinY();
+        }
+        else
+        {
+            intersection.origin.y = rect.getMinY();
+            
+            // The bottom part of rect is contained
+            if (rect.getMaxY() >= getMaxY())
+                intersection.size.height = getMaxY() - rect.getMinY();
+            // rect is vertically contained
+            else
+                intersection.size.height = rect.size.height;
+        }
+    }
+    return intersection;
+}
+
 NS_CC_END
