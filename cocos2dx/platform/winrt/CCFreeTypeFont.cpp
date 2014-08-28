@@ -526,7 +526,7 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 			continue;  /* ignore errors, jump to next glyph */
 
 		 /* translate the glyph image now */
-        float height = sqrtf((float)(m_face->height) / (float)(face->height));
+        float height = sqrtf((float)(m_face->size->metrics.height) / (float)(face->size->metrics.height));
         FT_Matrix matrix;
         matrix.xx = 0x10000L * height;
         matrix.xy = 0.0;
