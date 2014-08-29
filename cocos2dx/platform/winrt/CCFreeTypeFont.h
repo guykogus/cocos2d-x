@@ -131,7 +131,6 @@ private:
     int             m_textWidth;    // width of text text after word wrapping and line breaks    
     int             m_textHeight;   // height of text text after word wrapping and line breaks  
     int             m_lineHeight;   // height of a line for the font size
-    int             m_lineDelta;    // the difference between the line height of m_face and the biggest used face
     int             m_windowWidth;  // the width of the window
 
     FTLineInfo*     m_currentLine;  // the current line object to add words to.

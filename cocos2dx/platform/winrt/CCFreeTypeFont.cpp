@@ -46,7 +46,6 @@ static FT_Library s_FreeTypeLibrary = nullptr;
 CCFreeTypeFont::CCFreeTypeFont() 
     :m_space(" ")
     , m_face(nullptr)
-    , m_lineDelta(0)
 {
 
 }
@@ -158,16 +157,16 @@ bool CCFreeTypeFont::initWithString(
                 CCLOG("Failed to load face %s", fontFiles[i]);
 
             if (!error)
-                error = FT_Set_Char_Size(face, nSize << 6, nSize << 6, 72, 72);
-            else
-                CCLOG("Failed to select unicode charmap for %s", fontFiles[i]);
-
-            if (!error)
                 s_faces.push_back(face);
             else
-                CCLOG("Failed to set char size for %s", fontFiles[i]);
+                CCLOG("Failed to select unicode charmap for %s", fontFiles[i]);
         }
 	}
+
+    for (auto i = s_faces.begin(); !error && i != s_faces.end(); ++i)
+    {
+        error = FT_Set_Char_Size(*i, nSize << 6, nSize << 6, 72, 72);
+    }
 
 	if(!error && !m_face)
 	{
@@ -296,7 +295,7 @@ void  CCFreeTypeFont::drawText(FTLineInfo* pInfo, unsigned char* pBuffer, FT_Vec
         if (!error)
         {
             FT_BitmapGlyph  bit = (FT_BitmapGlyph)image;
-            draw_bitmap(pBuffer, &bit->bitmap, pen->x + glyph->pos.x + bit->left,pen->y - bit->top + m_lineDelta);
+            draw_bitmap(pBuffer, &bit->bitmap, pen->x + glyph->pos.x + bit->left,pen->y - bit->top);
             FT_Done_Glyph(image);
         }
     }
@@ -469,6 +468,7 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 {
 	FT_UInt			glyph_index;
 	FT_UInt			previous = 0;
+    FT_Face         previousFace = m_face;
 	FT_Error		error = 0;
 	PGlyph			glyph;
     unsigned int    numGlyphs = 0;
@@ -504,18 +504,7 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
             glyph_index = FT_Get_Char_Index(face, c);
         }
 
-        /* If a different font is being used, get the new max height */
-        if (face != m_face)
-        {
-            int lineHeight = ((face->size->metrics.ascender) >> 6) - ((face->size->metrics.descender) >> 6);
-            if (lineHeight > m_lineHeight)
-            {
-                m_lineDelta = (lineHeight - m_lineHeight) / 2;
-                m_lineHeight = lineHeight;
-            }
-        }
-
-        if (FT_HAS_KERNING(face) && previous && glyph_index)
+        if (FT_HAS_KERNING(face) && previousFace == face && previous && glyph_index)
 		{
 			FT_Vector  delta;
             FT_Get_Kerning(face, previous, glyph_index,
@@ -538,19 +527,14 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
 			continue;  /* ignore errors, jump to next glyph */
 
 		 /* translate the glyph image now */
-        float height = (float)(m_face->size->metrics.height) / (float)(face->size->metrics.height);
-        FT_Matrix matrix;
-        matrix.xx = 0x10000L * height;
-        matrix.xy = 0.0;
-        matrix.yx = 0.0;
-        matrix.yy = 0x10000L * height;
-		FT_Glyph_Transform(glyph->image, &matrix, &glyph->pos);
+		FT_Glyph_Transform(glyph->image, nullptr, &glyph->pos);
 
 		/* increment pen position */
-		pen.x += (FT_Pos)(face->glyph->advance.x * height) >> 6;
+		pen.x += (FT_Pos)(face->glyph->advance.x) >> 6;
 
 		/* record current glyph index */
 		previous = glyph_index;
+        previousFace = face;
 
 		numGlyphs++;
 	}
