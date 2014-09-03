@@ -698,7 +698,6 @@ void CCFileUtils::setSearchPaths(const std::vector<std::string>& searchPaths)
 {
     bool bExistDefaultRootPath = false;
 
-    m_fullPathCache.clear();
     m_searchPathArray.clear();
     for (std::vector<std::string>::const_iterator iter = searchPaths.begin(); iter != searchPaths.end(); ++iter)
     {
