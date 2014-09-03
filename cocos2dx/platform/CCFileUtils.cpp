@@ -640,6 +640,7 @@ std::string CCFileUtils::fullPathForFilename(const char* pszFileName)
     //CCLOG("cocos2d: fullPathForFilename: No file found at %s. Possible missing file.", pszFileName);
 
     // The file wasn't found, return the file name passed in.
+    m_fullPathCache.insert(std::pair<std::string, std::string>(pszFileName, pszFileName));
     return pszFileName;
 }
 
