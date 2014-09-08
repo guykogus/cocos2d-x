@@ -87,6 +87,13 @@ public:
     virtual void purgeCachedEntries();
     
     /**
+     *  Remove the cache for a file known to be unopenable.
+     *
+     *  @param[in]  pszFileName The resource file name which contains the path.
+     */
+    virtual void removeCachedEntry(const char* pszFileName);
+    
+    /**
      *  Gets resource file data
      *
      *  @param[in]  pszFileName The resource file name which contains the path.

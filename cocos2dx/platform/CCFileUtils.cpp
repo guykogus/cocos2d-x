@@ -485,6 +485,11 @@ void CCFileUtils::purgeCachedEntries()
     m_fullPathCache.clear();
 }
 
+void CCFileUtils::removeCachedEntry(const char* pszFileName)
+{
+    m_fullPathCache.erase(pszFileName);
+}
+
 unsigned char* CCFileUtils::getFileData(const char* pszFileName, const char* pszMode, unsigned long * pSize)
 {
     unsigned char * pBuffer = NULL;
