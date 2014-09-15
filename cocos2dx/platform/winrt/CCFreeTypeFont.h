@@ -93,10 +93,76 @@ public:
         int* outHeight
     );
 
-private:
-	unsigned char* loadFont(const char *pFontName, unsigned long *size);
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
 
-    unsigned char* CCFreeTypeFont::loadSystemFont(const char *pFontName, unsigned long *size);
+    /**
+    * These are the officially supported WP8 fonts listed at:
+    * http://msdn.microsoft.com/en-us/library/windows/apps/hh202920(v=vs.105).aspx
+    */
+    enum class SystemFont
+    {
+        /* UI Fonts */
+        SEGOE_WP,               // Latin, Cyrillic, Greek, Arabic, and Hebrew–based languages
+        DENG_XIAN,              // Chinese (Simplified)
+        MICROSOFT_MHEI,         // Chinese (Traditional)
+        YU_GOTHIC,              // Japanese
+        MICROSOFT_NEO_GOTHIC,   // Korean
+        SEGOE_UI,               // Latin, Cyrillic, Greek, Arabic, and Hebrew–based languages
+        NIRMALA_UI,             // India languages
+        LEELAWADEE,             // Thai
+        SEGOE_UI_SYMBOL,        // Supports various Unicode symbols, including emoji symbols added in Unicode 6.0.
+
+        /* Text display fonts */
+        EBRIMA,                 // Nko, Ethiopic, Tifinagh, Vai, and Osmanya
+        ESTRANGELO_EDESSA,      // Syriac
+        GADUGI,                 // Cherokee, and Unified Canadian Aboriginal Syllabics
+        KHMER_UI,               // Khmer
+        LAO_UI,                 // Lao
+        MICROSOFT_HIMALAYA,     // Tibetan
+        MICROSOFT_NEW_TAI_LUE,  // New Tai Lue
+        MICROSOFT_TAI_LE,       // Tai Le
+        MICROSOFT_UIGHUR,       // Uighur
+        MICROSOFT_YI_BAITI,     // Yi
+        MONGOLIAN_BAITI,        // Mongolian
+        MV_BOLI,                // Thaana
+        PHAGS_PA,               // Phags-pa
+        SIM_SUN,                // Chinese (Simplified)
+        URDU_TYPESETTING,       // Arabic
+
+        /* Additional fonts */
+        ARIAL,
+        ARIAL_BLACK,
+        CALIBRI,
+        CALIBRI_LIGHT,
+        COMIC_SANS_MS,
+        COURIER_NEW,
+        GEORGIA,
+        LUCIDA_SANS_UNICODE,
+        TAHOMA,
+        TIMES_NEW_ROMAN,
+        TREBUCHET_MS,
+        VERDANA,
+
+        /* Mathematical and symbol fonts */
+        CAMBRIA_AND_CAMBRIA_MATH,
+        WINGDINGS,
+        WEBDINGS
+    };
+
+    static const char* getSystemFontFileName(SystemFont systemFont);
+
+#endif
+
+    /**
+    Load the desired system fonts to be used as fallbacks in case a glyph can't be found in the otherwise provided fonts.
+    @param systemFonts The system fonts to use as fallback.
+    */
+    static void setSystemFonts(const std::vector<const char*>& systemFonts);
+
+private:
+	static unsigned char* loadFont(const char *pFontName, unsigned long *size);
+
+    static unsigned char* CCFreeTypeFont::loadSystemFont(const char *pFontName, unsigned long *size);
 
     FT_Error CCFreeTypeFont::initGlyphs(const char* text);
     FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::string& text, FT_Vector& pen);

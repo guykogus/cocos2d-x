@@ -115,7 +115,7 @@ bool CCFreeTypeFont::initWithString(
         if(!pBuffer)
         {
             // attempt to load default font from System fonts folder
-		    pBuffer = loadSystemFont("Arial", &size);
+            pBuffer = loadSystemFont("Arial", &size);
         }
 
         if(!pBuffer) // font not found!
@@ -134,33 +134,6 @@ bool CCFreeTypeFont::initWithString(
 	if(!s_FreeTypeLibrary)
 	{
 		error = FT_Init_FreeType(&s_FreeTypeLibrary);
-
-        // Load up extra fonts
-        static const size_t kFilesCount = 4;
-        const char* fontFiles[kFilesCount] = {
-            "MSNeoGothic",  // Korean
-            "DengXian",     // Chinese (Simplified)
-            "MSMhei",       // Chinese (Traditional)
-            "YuGothic"      // Japanese
-        };
-        s_faces.reserve(kFilesCount);
-        
-        for (size_t i = 0; i < kFilesCount && !error; ++i)
-        {
-            FT_Face face;
-            unsigned long fontSize = 0;
-            unsigned char* fontData = loadSystemFont(fontFiles[i], &fontSize);
-            error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
-            if (!error)
-                error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-            else
-                CCLOG("Failed to load face %s", fontFiles[i]);
-
-            if (!error)
-                s_faces.push_back(face);
-            else
-                CCLOG("Failed to select unicode charmap for %s", fontFiles[i]);
-        }
 	}
 
     for (auto i = s_faces.begin(); !error && i != s_faces.end(); ++i)
@@ -215,6 +188,176 @@ unsigned char* CCFreeTypeFont::getBitmap(CCImage::ETextAlign eAlignMask, int* ou
     reset();
 
     return pBuffer;
+}
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+
+const char*  CCFreeTypeFont::getSystemFontFileName(SystemFont systemFont)
+{
+    const char* fontFileName;
+    switch (systemFont)
+    {
+        /* UI Fonts */
+    case SystemFont::SEGOE_WP:
+        fontFileName = "SegoeWP";
+        break;
+    case SystemFont::DENG_XIAN:
+        fontFileName = "DengXian";
+        break;
+    case SystemFont::MICROSOFT_MHEI:
+        fontFileName = "MSMhei";
+        break;
+    case SystemFont::YU_GOTHIC:
+        fontFileName = "YuGothic";
+        break;
+    case SystemFont::MICROSOFT_NEO_GOTHIC:
+        fontFileName = "MSNeoGothic";
+        break;
+    case SystemFont::SEGOE_UI:
+        fontFileName = "SegoeUI";
+        break;
+    case SystemFont::NIRMALA_UI:
+        fontFileName = "Nirmala";
+        break;
+    case SystemFont::LEELAWADEE:
+        fontFileName = "leelawad";
+        break;
+    case SystemFont::SEGOE_UI_SYMBOL:
+        fontFileName = "seguisym";
+        break;
+        /* Text display fonts */
+    case SystemFont::EBRIMA:
+        fontFileName = "ebrima";
+        break;
+    case SystemFont::ESTRANGELO_EDESSA:
+        fontFileName = "estre";
+        break;
+    case SystemFont::GADUGI:
+        fontFileName = "gadugi";
+        break;
+    case SystemFont::KHMER_UI:
+        fontFileName = "KhmerUI";
+        break;
+    case SystemFont::LAO_UI:
+        fontFileName = "LaoUI";
+        break;
+    case SystemFont::MICROSOFT_HIMALAYA:
+        fontFileName = "himalaya";
+        break;
+    case SystemFont::MICROSOFT_NEW_TAI_LUE:
+        fontFileName = "ntailu";
+        break;
+    case SystemFont::MICROSOFT_TAI_LE:
+        fontFileName = "taile";
+        break;
+    case SystemFont::MICROSOFT_UIGHUR:
+        fontFileName = "msuighur";
+        break;
+    case SystemFont::MICROSOFT_YI_BAITI:
+        fontFileName = "msyi";
+        break;
+    case SystemFont::MONGOLIAN_BAITI:
+        fontFileName = "monbaiti";
+        break;
+    case SystemFont::MV_BOLI:
+        fontFileName = "mvboli";
+        break;
+    case SystemFont::PHAGS_PA:
+        fontFileName = "phagspa";
+        break;
+    case SystemFont::SIM_SUN:
+        fontFileName = "simsun.ttc";
+        break;
+    case SystemFont::URDU_TYPESETTING:
+        fontFileName = "UrdType";
+        break;
+        /* Additional fonts */
+    case SystemFont::ARIAL:
+        fontFileName = "arial";
+        break;
+    case SystemFont::ARIAL_BLACK:
+        fontFileName = "ariblk";
+        break;
+    case SystemFont::CALIBRI:
+        fontFileName = "calibri";
+        break;
+    case SystemFont::CALIBRI_LIGHT:
+        fontFileName = "calibril";
+        break;
+    case SystemFont::COMIC_SANS_MS:
+        fontFileName = "comic";
+        break;
+    case SystemFont::COURIER_NEW:
+        fontFileName = "cour";
+        break;
+    case SystemFont::GEORGIA:
+        fontFileName = "georgia";
+        break;
+    case SystemFont::LUCIDA_SANS_UNICODE:
+        fontFileName = "l_10646";
+        break;
+    case SystemFont::TAHOMA:
+        fontFileName = "tahoma";
+        break;
+    case SystemFont::TIMES_NEW_ROMAN:
+        fontFileName = "times";
+        break;
+    case SystemFont::TREBUCHET_MS:
+        fontFileName = "trebuc";
+        break;
+    case SystemFont::VERDANA:
+        fontFileName = "verdana";
+        break;
+        /* Mathematical and symbol fonts */
+    case SystemFont::CAMBRIA_AND_CAMBRIA_MATH:
+        fontFileName = "cambria.ttc";
+        break;
+    case SystemFont::WINGDINGS:
+        fontFileName = "webdings";
+        break;
+    case SystemFont::WEBDINGS:
+        fontFileName = "wingding";
+        break;
+    default:
+        fontFileName = nullptr;
+        break;
+    }
+    return fontFileName;
+}
+
+#endif
+
+void CCFreeTypeFont::setSystemFonts(const std::vector<const char*>& systemFonts)
+{
+    // Ensure the library is initialised
+    if (!s_FreeTypeLibrary)
+    {
+        FT_Error error = FT_Init_FreeType(&s_FreeTypeLibrary);
+        if (error != 0)
+            return;
+    }
+
+    // Clear out the system fonts first
+    for (auto i = s_faces.begin(); i != s_faces.end(); ++i)
+    {
+        FT_Done_Face(*i);
+    }
+    s_faces.clear();
+    s_faces.reserve(systemFonts.size());
+
+    // Load the system font files that match the enums
+    for (auto i = systemFonts.begin(); i != systemFonts.end(); ++i)
+    {
+        FT_Face face;
+        unsigned long fontSize = 0;
+        unsigned char* fontData = loadSystemFont(*i, &fontSize);
+        FT_Error error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
+        if (!error)
+            error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+
+        if (!error)
+            s_faces.push_back(face);
+    } // end for systemFonts
 }
 
 FT_Vector CCFreeTypeFont::getPenForAlignment(FTLineInfo* pInfo, CCImage::ETextAlign eAlignMask,int lineNumber, int totalLines)
@@ -625,7 +768,11 @@ unsigned char* CCFreeTypeFont::loadSystemFont(const char *pFontName, unsigned lo
     //Froxul: Add the ability to use system fonts on WP8 and WinRT
     //http://www.cocos2d-x.org/forums/6/topics/37224
     std::string fontName(pFontName);
-    if (fontName.find(".ttf") == std::string::npos) fontName += ".ttf";
+    if (fontName.rfind(".ttf") == std::string::npos &&
+        fontName.rfind(".ttc") == std::string::npos)
+    {
+        fontName += ".ttf";
+    }
     std::string fontPath = "C:\\Windows\\Fonts\\" + fontName;
     return CCFileUtils::sharedFileUtils()->getFileData(fontPath.c_str(), "rb", size);
 #else
