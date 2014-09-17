@@ -357,12 +357,16 @@ void CCFreeTypeFont::setFallbackFonts(const std::vector<const char*>& fonts)
             // Else try loading as a supplied font
             fontData = loadFont(*i, &fontSize);
         }
-        FT_Error error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
-        if (!error)
-            error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 
-        if (!error)
-            s_faces.push_back(face);
+        if (fontData)
+        {
+            FT_Error error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
+            if (!error)
+                error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+
+            if (!error)
+                s_faces.push_back(face);
+        }
     } // end for systemFonts
 }
 
