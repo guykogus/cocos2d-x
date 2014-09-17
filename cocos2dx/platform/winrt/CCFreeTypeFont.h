@@ -95,10 +95,10 @@ public:
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
 
-    /**
-    * These are the officially supported WP8 fonts listed at:
-    * http://msdn.microsoft.com/en-us/library/windows/apps/hh202920(v=vs.105).aspx
-    */
+    /// <summary>
+    /// These are the officially supported WP8 fonts listed at:
+    /// http://msdn.microsoft.com/en-us/library/windows/apps/hh202920(v=vs.105).aspx
+    /// </summary>
     enum class SystemFont
     {
         /* UI Fonts */
@@ -149,15 +149,33 @@ public:
         WEBDINGS
     };
 
+    /// <summary>Return the corresponding file name for the requested system font.</summary>
+    /// <param name="systemFont">The requested system font.</param>
+    /// <returns>The name of the curresponding system font.</returns>
     static const char* getSystemFontFileName(SystemFont systemFont);
 
 #endif
 
-    /**
-    Load the desired system fonts to be used as fallbacks in case a glyph can't be found in the otherwise provided fonts.
-    @param systemFonts The system fonts to use as fallback.
-    */
-    static void setSystemFonts(const std::vector<const char*>& systemFonts);
+    /// <summary>
+    /// Strings is drawn one glyph at a time. If no glyph can be found for a given font then it normally prints out a square.
+    /// The fallback fonts are used when a glyph cannot be found for a string.
+    /// Setting the fallback fonts loads them to be used as fallbacks in case a glyph can't be found in the otherwise provided fonts.
+    /// E.g. When trying to print a chinese character when using Arial.
+    /// </summary>
+    /// <param name="fonts">These fonts will be used as fallback.</param>
+    /// <example> On Windows Phone 8 you could set fallback fonts like this:
+    /// <code>
+    /// std::vector&lt;const char*&gt; systemFonts;
+    /// systemFonts.push_back(CCFreeTypeFont::getSystemFontFileName(CCFreeTypeFont::SystemFont::MICROSOFT_NEO_GOTHIC));
+    /// systemFonts.push_back(CCFreeTypeFont::getSystemFontFileName(CCFreeTypeFont::SystemFont::DENG_XIAN));
+    /// systemFonts.push_back(CCFreeTypeFont::getSystemFontFileName(CCFreeTypeFont::SystemFont::MICROSOFT_MHEI));
+    /// systemFonts.push_back(CCFreeTypeFont::getSystemFontFileName(CCFreeTypeFont::SystemFont::YU_GOTHIC));
+    /// CCFreeTypeFont::setFallbackFonts(systemFonts);
+    /// </code>
+    /// Note that to include CCFreeTypeFont.h you will need to add the following to your C++ Include Directories:
+    /// $(ProjectDir)..\..\..\cocos2d-x\cocos2dx\platform\third_party\winrt\freetype\include;
+    /// </example>
+    static void setFallbackFonts(const std::vector<const char*>& fonts);
 
 private:
 	static unsigned char* loadFont(const char *pFontName, unsigned long *size);

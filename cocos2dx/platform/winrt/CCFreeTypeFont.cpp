@@ -199,124 +199,124 @@ const char*  CCFreeTypeFont::getSystemFontFileName(SystemFont systemFont)
     {
         /* UI Fonts */
     case SystemFont::SEGOE_WP:
-        fontFileName = "SegoeWP";
+        fontFileName = "SegoeWP.ttf";
         break;
     case SystemFont::DENG_XIAN:
-        fontFileName = "DengXian";
+        fontFileName = "DengXian.ttf";
         break;
     case SystemFont::MICROSOFT_MHEI:
-        fontFileName = "MSMhei";
+        fontFileName = "MSMhei.ttf";
         break;
     case SystemFont::YU_GOTHIC:
-        fontFileName = "YuGothic";
+        fontFileName = "YuGothic.ttf";
         break;
     case SystemFont::MICROSOFT_NEO_GOTHIC:
-        fontFileName = "MSNeoGothic";
+        fontFileName = "MSNeoGothic.ttf";
         break;
     case SystemFont::SEGOE_UI:
-        fontFileName = "SegoeUI";
+        fontFileName = "SegoeUI.ttf";
         break;
     case SystemFont::NIRMALA_UI:
-        fontFileName = "Nirmala";
+        fontFileName = "Nirmala.ttf";
         break;
     case SystemFont::LEELAWADEE:
-        fontFileName = "leelawad";
+        fontFileName = "leelawad.ttf";
         break;
     case SystemFont::SEGOE_UI_SYMBOL:
-        fontFileName = "seguisym";
+        fontFileName = "seguisym.ttf";
         break;
         /* Text display fonts */
     case SystemFont::EBRIMA:
-        fontFileName = "ebrima";
+        fontFileName = "ebrima.ttf";
         break;
     case SystemFont::ESTRANGELO_EDESSA:
-        fontFileName = "estre";
+        fontFileName = "estre.ttf";
         break;
     case SystemFont::GADUGI:
-        fontFileName = "gadugi";
+        fontFileName = "gadugi.ttf";
         break;
     case SystemFont::KHMER_UI:
-        fontFileName = "KhmerUI";
+        fontFileName = "KhmerUI.ttf";
         break;
     case SystemFont::LAO_UI:
-        fontFileName = "LaoUI";
+        fontFileName = "LaoUI.ttf";
         break;
     case SystemFont::MICROSOFT_HIMALAYA:
-        fontFileName = "himalaya";
+        fontFileName = "himalaya.ttf";
         break;
     case SystemFont::MICROSOFT_NEW_TAI_LUE:
-        fontFileName = "ntailu";
+        fontFileName = "ntailu.ttf";
         break;
     case SystemFont::MICROSOFT_TAI_LE:
-        fontFileName = "taile";
+        fontFileName = "taile.ttf";
         break;
     case SystemFont::MICROSOFT_UIGHUR:
-        fontFileName = "msuighur";
+        fontFileName = "msuighur.ttf";
         break;
     case SystemFont::MICROSOFT_YI_BAITI:
-        fontFileName = "msyi";
+        fontFileName = "msyi.ttf";
         break;
     case SystemFont::MONGOLIAN_BAITI:
-        fontFileName = "monbaiti";
+        fontFileName = "monbaiti.ttf";
         break;
     case SystemFont::MV_BOLI:
-        fontFileName = "mvboli";
+        fontFileName = "mvboli.ttf";
         break;
     case SystemFont::PHAGS_PA:
-        fontFileName = "phagspa";
+        fontFileName = "phagspa.ttf";
         break;
     case SystemFont::SIM_SUN:
         fontFileName = "simsun.ttc";
         break;
     case SystemFont::URDU_TYPESETTING:
-        fontFileName = "UrdType";
+        fontFileName = "UrdType.ttf";
         break;
         /* Additional fonts */
     case SystemFont::ARIAL:
-        fontFileName = "arial";
+        fontFileName = "arial.ttf";
         break;
     case SystemFont::ARIAL_BLACK:
-        fontFileName = "ariblk";
+        fontFileName = "ariblk.ttf";
         break;
     case SystemFont::CALIBRI:
-        fontFileName = "calibri";
+        fontFileName = "calibri.ttf";
         break;
     case SystemFont::CALIBRI_LIGHT:
-        fontFileName = "calibril";
+        fontFileName = "calibril.ttf";
         break;
     case SystemFont::COMIC_SANS_MS:
-        fontFileName = "comic";
+        fontFileName = "comic.ttf";
         break;
     case SystemFont::COURIER_NEW:
-        fontFileName = "cour";
+        fontFileName = "cour.ttf";
         break;
     case SystemFont::GEORGIA:
-        fontFileName = "georgia";
+        fontFileName = "georgia.ttf";
         break;
     case SystemFont::LUCIDA_SANS_UNICODE:
-        fontFileName = "l_10646";
+        fontFileName = "l_10646.ttf";
         break;
     case SystemFont::TAHOMA:
-        fontFileName = "tahoma";
+        fontFileName = "tahoma.ttf";
         break;
     case SystemFont::TIMES_NEW_ROMAN:
-        fontFileName = "times";
+        fontFileName = "times.ttf";
         break;
     case SystemFont::TREBUCHET_MS:
-        fontFileName = "trebuc";
+        fontFileName = "trebuc.ttf";
         break;
     case SystemFont::VERDANA:
-        fontFileName = "verdana";
+        fontFileName = "verdana.ttf";
         break;
         /* Mathematical and symbol fonts */
     case SystemFont::CAMBRIA_AND_CAMBRIA_MATH:
         fontFileName = "cambria.ttc";
         break;
     case SystemFont::WINGDINGS:
-        fontFileName = "webdings";
+        fontFileName = "webdings.ttf";
         break;
     case SystemFont::WEBDINGS:
-        fontFileName = "wingding";
+        fontFileName = "wingding.ttf";
         break;
     default:
         fontFileName = nullptr;
@@ -327,7 +327,7 @@ const char*  CCFreeTypeFont::getSystemFontFileName(SystemFont systemFont)
 
 #endif
 
-void CCFreeTypeFont::setSystemFonts(const std::vector<const char*>& systemFonts)
+void CCFreeTypeFont::setFallbackFonts(const std::vector<const char*>& fonts)
 {
     // Ensure the library is initialised
     if (!s_FreeTypeLibrary)
@@ -343,14 +343,20 @@ void CCFreeTypeFont::setSystemFonts(const std::vector<const char*>& systemFonts)
         FT_Done_Face(*i);
     }
     s_faces.clear();
-    s_faces.reserve(systemFonts.size());
+    s_faces.reserve(fonts.size());
 
     // Load the system font files that match the enums
-    for (auto i = systemFonts.begin(); i != systemFonts.end(); ++i)
+    for (auto i = fonts.begin(); i != fonts.end(); ++i)
     {
         FT_Face face;
         unsigned long fontSize = 0;
+        // Try as a system font first
         unsigned char* fontData = loadSystemFont(*i, &fontSize);
+        if (!fontData)
+        {
+            // Else try loading as a supplied font
+            fontData = loadFont(*i, &fontSize);
+        }
         FT_Error error = FT_New_Memory_Face(s_FreeTypeLibrary, fontData, fontSize, 0, &face);
         if (!error)
             error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
