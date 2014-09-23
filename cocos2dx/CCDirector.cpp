@@ -323,8 +323,8 @@ void CCDirector::calculateDeltaTime(void)
         m_fDeltaTime = MAX(0, m_fDeltaTime);
     }
 
-    // Don't allow skipping too many frames at a time. This may slow down the game at times, but it beats jumping ahead
-    m_fDeltaTime = MIN(m_fDeltaTime, m_dAnimationInterval);
+//    // Don't allow skipping too many frames at a time. This may slow down the game at times, but it beats jumping ahead
+//    m_fDeltaTime = MIN(m_fDeltaTime, m_dAnimationInterval);
 
     *m_pLastUpdate = now;
 }
