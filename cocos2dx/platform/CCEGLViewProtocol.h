@@ -182,6 +182,8 @@ protected:
 
     // real screen size
     CCSize m_obScreenSize;
+    // design resolution set by the user
+    CCSize m_obOriginalDesignResolutionSize;
     // resolution size, it is the size appropriate for the app resources.
     CCSize m_obDesignResolutionSize;
     // the view port size

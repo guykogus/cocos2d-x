@@ -464,22 +464,26 @@ void CCEGLView::UpdateWindowSize()
 
     UpdateOrientationMatrix();
 
-    //CCSize designSize = getDesignResolutionSize();
     if(!m_initialized)
     {
         m_initialized = true;
-        CCEGLViewProtocol::setFrameSize(width, height);
+        setFrameSize(width, height);
     }
     else
     {
-        m_obScreenSize = CCSizeMake(width, height);
-        CCSize designSize = getDesignResolutionSize();
-        if(m_eResolutionPolicy == kResolutionUnKnown)
+        if (m_obScreenSize.width != width || m_obScreenSize.height != height)
         {
-            m_eResolutionPolicy = kResolutionShowAll;
+            m_obScreenSize.setSize(width, height);
+            // Ensure a valid design policy is being used
+            if (m_eResolutionPolicy == kResolutionUnKnown)
+                m_eResolutionPolicy = kResolutionShowAll;
+            // For fixed width/height, swap the design sizes
+            if (m_eResolutionPolicy == kResolutionFixedHeight || m_eResolutionPolicy == kResolutionFixedWidth)
+                setDesignResolutionSize(m_obOriginalDesignResolutionSize.height, m_obOriginalDesignResolutionSize.width, m_eResolutionPolicy);
+            else
+                setDesignResolutionSize(m_obOriginalDesignResolutionSize.width, m_obOriginalDesignResolutionSize.height, m_eResolutionPolicy);
+            CCDirector::sharedDirector()->setProjection(CCDirector::sharedDirector()->getProjection());
         }
-        CCEGLView::sharedOpenGLView()->setDesignResolutionSize(designSize.width, designSize.height, m_eResolutionPolicy);
-        CCDirector::sharedDirector()->setProjection(CCDirector::sharedDirector()->getProjection());
    }
 }
 

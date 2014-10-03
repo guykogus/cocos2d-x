@@ -64,6 +64,7 @@ void CCEGLViewProtocol::setDesignResolutionSize(float width, float height, Resol
         return;
     }
 
+    m_obOriginalDesignResolutionSize.setSize(width, height);
     m_obDesignResolutionSize.setSize(width, height);
     
     m_fScaleX = (float)m_obScreenSize.width / m_obDesignResolutionSize.width;
