@@ -29,7 +29,12 @@ NS_CC_BEGIN
 
 int CCDevice::getDPI()
 {
-	return floor(Windows::Graphics::Display::DisplayProperties::LogicalDpi + 0.5f); // Round to nearest integer.
+    static float dpi = -1.0f;
+    if (dpi == -1.0f)
+    {
+        dpi = floor((Windows::Graphics::Display::DisplayProperties::LogicalDpi * 3.0f) + 0.5f); // Round to nearest integer.
+    }
+	return dpi;
 }
 
 NS_CC_END
