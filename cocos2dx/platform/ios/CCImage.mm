@@ -166,31 +166,15 @@ static bool _initWithData(void * pBuffer, int length, tImageInfo *pImageinfo)
 
 static CGSize _calculateStringSize(NSString *str, id font, CGSize *constrainSize)
 {
-    NSArray *listItems = [str componentsSeparatedByString: @"\n"];
-    CGSize dim = CGSizeZero;
-    CGSize textRect = CGSizeZero;
-    textRect.width = constrainSize->width > 0 ? constrainSize->width
-                                              : 0x7fffffff;
-    textRect.height = constrainSize->height > 0 ? constrainSize->height
-                                              : 0x7fffffff;
-    
-    
-    for (NSString *s in listItems)
-    {
-        CGSize tmp = [s sizeWithFont:font constrainedToSize:textRect];
-        
-        if (tmp.width > dim.width)
-        {
-           dim.width = tmp.width; 
-        }
-        
-        dim.height += tmp.height;
-    }
-    
-    dim.width = ceilf(dim.width);
-    dim.height = ceilf(dim.height);
-    
-    return dim;
+    static UILabel *label;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        label = [[UILabel alloc] init];
+        label.numberOfLines = 0;
+    });
+    [label setFont:font];
+    [label setText:str];
+    return [label sizeThatFits:*constrainSize];
 }
 
 // refer CCImage::ETextAlign
