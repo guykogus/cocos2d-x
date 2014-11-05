@@ -32,6 +32,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <list>
 #include <memory>
 #include <algorithm>
 
@@ -40,7 +41,7 @@ using namespace std;
 NS_CC_BEGIN
 
 static map<std::string, FontBufferInfo> s_fontsNames;
-static vector<pair<FT_Face, unsigned char*>> s_faces;
+static list<pair<FT_Face, unsigned char*>> s_faces;
 static FT_Library s_FreeTypeLibrary = nullptr;
 
 CCFreeTypeFont::CCFreeTypeFont() 
@@ -344,7 +345,6 @@ void CCFreeTypeFont::setFallbackFonts(const std::vector<const char*>& fonts)
         delete [] i->second;
     }
     s_faces.clear();
-    s_faces.reserve(fonts.size());
 
     // Load the system font files that match the enums
     for (auto i = fonts.begin(); i != fonts.end(); ++i)
@@ -656,6 +656,16 @@ FT_Error CCFreeTypeFont::initWordGlyphs(std::vector<TGlyph>& glyphs, const std::
         {
             face = i->first;
             glyph_index = FT_Get_Char_Index(face, c);
+
+            // If a later face is used, bump it up to the front
+            if (glyph_index != 0 && i != s_faces.begin())
+            {
+                auto temp = *i;
+                s_faces.erase(i);
+                s_faces.push_front(temp);
+                // Reset the iterator since it is invalidated
+                i = s_faces.begin();
+            }
         }
 
         if (FT_HAS_KERNING(face) && previousFace == face && previous && glyph_index)
