@@ -83,12 +83,12 @@ public:
     void reset();
 
     std::string m_NameStr;
-    int               numberOfCalls;
-    int               m_dAverageTime1;
-    int               m_dAverageTime2;
+    long long         numberOfCalls;
+    long long         m_dAverageTime1;
+    long long         m_dAverageTime2;
     long long         totalTime;
-    int               minTime;
-    int               maxTime;
+    long long         minTime;
+    long long         maxTime;
     struct cc_timeval m_sStartTime;
 };
 

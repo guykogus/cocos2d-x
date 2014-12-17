@@ -119,7 +119,7 @@ const char* CCProfilingTimer::description()
 {
     static char s_desciption[512] = {0};
     
-    sprintf(s_desciption, "%s ::\tavg1: %dµ,\tavg2: %dµ,\tmin: %dµ,\tmax: %dµ,\ttotal: %.2fs,\tnr calls: %d", m_NameStr.c_str(), m_dAverageTime1, m_dAverageTime2, minTime, maxTime, totalTime/1000000., numberOfCalls);
+    sprintf(s_desciption, "%s ::\tavg1: %lldµ,\tavg2: %lldµ,\tmin: %lldµ,\tmax: %lldµ,\ttotal: %.2fs,\tnr calls: %lldµ", m_NameStr.c_str(), m_dAverageTime1, m_dAverageTime2, minTime, maxTime, totalTime/1000000., numberOfCalls);
     return s_desciption;
 }
 
@@ -159,7 +159,7 @@ void CCProfilingEndTimingBlock(const char *timerName)
 
     CCAssert(timer, "CCProfilingTimer  not found");
     
-    int duration = 1000000 * (now.tv_sec - timer->m_sStartTime.tv_sec) + (now.tv_usec - timer->m_sStartTime.tv_usec);
+    long long duration = 1000000 * (now.tv_sec - timer->m_sStartTime.tv_sec) + (now.tv_usec - timer->m_sStartTime.tv_usec);
 
     timer->totalTime += duration;
     timer->m_dAverageTime1 = (timer->m_dAverageTime1 + duration) / 2.0f;
