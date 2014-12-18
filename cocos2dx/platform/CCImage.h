@@ -180,7 +180,9 @@ protected:
     bool _initWithJpgData(void *pData, int nDatalen);
     bool _initWithPngData(void *pData, int nDatalen);
     bool _initWithTiffData(void *pData, int nDataLen);
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_IOS) && (CC_TARGET_PLATFORM != CC_PLATFORM_MAC)
     bool _initWithWebpData(void *pData, int nDataLen);
+#endif
     // @warning kFmtRawData only support RGBA8888
     bool _initWithRawData(void *pData, int nDatalen, int nWidth, int nHeight, int nBitsPerComponent, bool bPreMulti);
 
