@@ -219,7 +219,7 @@ void CCEGLView::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 
 void CCEGLView::OnPointerPressed(PointerEventArgs^ args)
 {
-    int id = args->CurrentPoint->PointerId;
+    long id = args->CurrentPoint->PointerId;
     CCPoint pt = GetCCPoint(args);
     handleTouchesBegin(1, &id, &pt.x, &pt.y);
 }
@@ -228,7 +228,7 @@ void CCEGLView::OnPointerPressed(PointerEventArgs^ args)
 void CCEGLView::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ args)
 {
     float direction = (float)args->CurrentPoint->Properties->MouseWheelDelta;
-    int id = 0;
+    long id = 0;
     CCPoint p(0.0f,0.0f);
     handleTouchesBegin(1, &id, &p.x, &p.y);
     p.y += direction;
@@ -258,7 +258,7 @@ void CCEGLView::OnPointerMoved( PointerEventArgs^ args)
 	{
 		if (m_lastPointValid)
 		{
-			int id = args->CurrentPoint->PointerId;
+			long id = args->CurrentPoint->PointerId;
 			CCPoint p = GetCCPoint(args);
 			handleTouchesMove(1, &id, &p.x, &p.y);
 		}
@@ -278,7 +278,7 @@ void CCEGLView::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
 
 void CCEGLView::OnPointerReleased(PointerEventArgs^ args)
 {
-    int id = args->CurrentPoint->PointerId;
+    long id = args->CurrentPoint->PointerId;
     CCPoint pt = GetCCPoint(args);
     handleTouchesEnd(1, &id, &pt.x, &pt.y);
 }
