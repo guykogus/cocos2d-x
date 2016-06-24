@@ -461,13 +461,13 @@ int CCBReader::readInt(bool pSigned) {
         numBits++;
     }
     
-    long long current = 0;
+    int current = 0;
     for(int a = numBits - 1; a >= 0; a--) {
         if(this->getBit()) {
-            current |= 1LL << a;
+            current |= 1 << a;
         }
     }
-    current |= 1LL << numBits;
+    current |= 1 << numBits;
     
     int num;
     if(pSigned) {

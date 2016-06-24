@@ -734,7 +734,7 @@ void CCArmature::drawContour()
                 points[i].y = vertex->y;
             }
             ccDrawPoly( points, length, true );
-            delete points;
+            delete[] points;
         }
     }
 }
