@@ -131,7 +131,7 @@ public:
     /** Get the size of request data back */
     inline int getRequestDataSize()
     {
-        return static_cast<int>(_requestData.size());
+        return _requestData.size();
     }
     
     /** Option field. You can set a string tag to identify your request, this tag can be found in HttpResponse->getHttpRequest->getTag()
